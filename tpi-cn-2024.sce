@@ -31,8 +31,8 @@ h = 1 // coeficiente de transferencia de calor por convección de la edificació
 
 
 
-TAmbMax = 32 //"Máxima Temperatura Ambiente"
-TAmbMin = 10 //"Mínima Temperatura Ambiente"
+TAmbMax = 29 //"Máxima Temperatura Ambiente"
+TAmbMin = 7 //"Mínima Temperatura Ambiente"
 InicioSubida = 6 //"Hora en la que empieza a incrementar la temperatura"
 FinSubida = 11 //"Hora en la que empieza a incrementar la temperatura"
 InicioBajada = 14 //"Hora en la que empieza a decrementar la temperatura"
@@ -66,7 +66,14 @@ function Pc = potenciaCalefaccionUnitaria(t)
         Esta función debe devolver la POTENCIA DE CALEFACCIÓN por
         m2 de edificio, en función de la HORA.
     */
-    Pc = 1 // Potencia de calefacción por metro cuadrado de superficie construida [W/m2]
+    // Pc = 1 // Potencia de calefacción por metro cuadrado de superficie construida [W/m2]
+    minPot = 6
+    maxPot = 15
+    if t <= InicioSubida || t >= FinBajada then
+        Pc = minPot
+    else
+        Pc = maxPot
+    end
 endfunction
 
 precioEnergiaCalefaccion = 1.6*0.0045/1000/0.8 // [dólares/Wh]
@@ -187,17 +194,21 @@ endfunction
             del coeficiente de transferencia por
             convección.
             Y obtener el coeficiente para la 
-            velocidad del aire del lugar. (2 Puntos)
+            velocidad del aire del lugar. (2.5 Puntos)
         (2) Obtener la Temperatura Interior
             (Verificar que se cumplan las
              condiciones necesarias del proceso
              y que la temperatura al final
-             del día sea igual a la inicial) (2 Puntos)
-        (3) Calcular los calores intercambiados por
-            por el piso y escrutura del edificio (2 Puntos)
-        (4) Calcular el calor de calefacción y refrigeración. (2 Puntos)
-        (5) Calcular los costos de calefacción y refrigeración (2 Puntos)
+             del día sea igual a la inicial) (2.5 Puntos)
+        (3) Calcular el calor de calefacción y refrigeración. (2.5 Puntos)
+        (4) Calcular los costos de calefacción y refrigeración (2.5 Puntos)
 *******************************************/
+function y=h_viento(v)
+    /* Función obtenida del leastsqr() )*/
+    y = 4.79*. v + 3.67
+endfunction
+
+clf
 
 t = [0]
 T_ext = [T_exterior(0)]
@@ -213,8 +224,18 @@ for i = 1:N,
 end
 
 plot(t,T_ext)
-objeto_grafico = gca()
-objeto_grafico.data_bounds=[0,24,0,35]
-xlabel("hora")
-ylabel("temperatura exterior")
+//objeto_grafico = gca()
+//objeto_grafico.data_bounds = [0,24,0,35]
+//xlabel("hora")
+//ylabel("temperatura exterior")
 
+t = [0]
+T = [T_ini]
+
+for i = 1:N,
+    Ti = T($)+Dt*3600*f(t($), T($))
+    t = [t, t($)+Dt]
+    T = [T,Ti]
+end
+
+plot(t,T,'r')
