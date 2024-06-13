@@ -67,36 +67,32 @@ function Pc = potenciaCalefaccionUnitaria(t)
         m2 de edificio, en función de la HORA.
     */
     // Pc = 1 // Potencia de calefacción por metro cuadrado de superficie construida [W/m2]
-    /* PROPUESTA 1
-    function Pc = potenciaCalefaccionUnitaria(t)
+    // PROPUESTA 1
     minPot = 1.3
     maxPot = 15
     if t <= InicioSubida || t >= FinBajada then
         Pc = maxPot
     else
         Pc = minPot
-    end
-endfunction */ 
-    /* PROPUESTA 2
+    end 
+    /* // PROPUESTA 2
     minPot = 0
     maxPot = 15
     if t <= InicioSubida || t >= InicioBajada then
         Pc = maxPot
     else
         Pc = minPot
-    end
-endfunction */
-    /* PROPUESTA 3
+    end */
+    /* // PROPUESTA 3
     minPot = 1.3
     maxPot = 16.5
     if t <= InicioSubida || t >= FinBajada then
         Pc = maxPot
     else
         Pc = minPot
-    end
-    
-endfunction */
-endfunction 
+    end */
+endfunction
+
 
 precioEnergiaCalefaccion = 1.6*0.0045/1000/0.8 // [dólares/Wh]
 
@@ -123,26 +119,26 @@ function Pr = potenciaRefrigeracionUnitaria(t)
         IMPORTANTE: Expresamos la potencia con signo POSITIVO, ya que 
         se trata del calor que EXTRAE el refrigerador del interior.
     */ 
+    // PROPUESTA 1
     Pr = 1 // Potencia de refrigeración por metro cuadrado de superficie construida [W/m2]
-    /* PROPUESTA 2
+    
+    /* // PROPUESTA 2
     minPot = 0
     maxPot = 30
     if t >= FinSubida && t <= InicioBajada then
         Pr = maxPot
     else
         Pr = minPot
-    end
-endfunction
-    */
-    /* PROPUESTA 3
+    end */
+    /* // PROPUESTA 3
     minPot= 0
     maxPot = 5
     if t<=FinSubida && t <= InicioBajada then
         Pr = maxPot
     else
         Pr = minPot
-    end
-endfunction */
+    end*/
+endfunction 
 
 precioEnergiaRefrigeracion = 0.12/1000 // [dólares/Wh]
 
