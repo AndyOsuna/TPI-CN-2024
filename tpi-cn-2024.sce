@@ -61,33 +61,25 @@ capacidadCalorificaEdificio = capacidadCalorificaUnitaria * superficiePiso // [J
         CALEFACCIÓN
 --------------------------------------------- */
 function Pc = potenciaCalefaccionUnitaria(t)
-    /*
-        PARA MODIFICAR:
-        Esta función debe devolver la POTENCIA DE CALEFACCIÓN por
-        m2 de edificio, en función de la HORA.
-    */
-    // Pc = 1 // Potencia de calefacción por metro cuadrado de superficie construida [W/m2]
-    minPot = 6
+    minPot = 1.3
     maxPot = 15
     if t <= InicioSubida || t >= FinBajada then
-        Pc = minPot
-    else
         Pc = maxPot
+    else
+        Pc = minPot
     end
 endfunction
 
 precioEnergiaCalefaccion = 1.6*0.0045/1000/0.8 // [dólares/Wh]
 
 ////////////////////////////////////////////////////////////////////////////////////
-// CALCULO DEL COSTO DE ENERGÍA DE CALEFACCIÓN
-//poderCalorificoGas = 12 //[kWh/m3]
-//precioM3Gas = 55 // [$/m3]
-//precio_energia_Gas_Pesos_kWh = precioM3Gas / poderCalorificoGas
-//precioDolar_Pesos = 1000 
-//precio_energia_Gas_USD_kWh = precio_energia_Gas_Pesos_kWh / precioDolar_Pesos // SUMAR 60% de IMPUESTOS
-//precio_energia_Gas_USD_Wh = precio_energia_Gas_USD_kWh / 1000 // SUMAR 60% de IMPUESTOS
-// SE DEBE TAMBIEN TENER EN CUENTA LA EFICIENCIA TERMICA DEL SISTEMA DE CALEFACCIÓN
-// EN EL CASO DE UN SISTEMA CENTRAL, ESTA PUEDE SER ALREDEDOR DEL 80%
+//  CALCULO DEL COSTO DE ENERGÍA DE CALEFACCIÓN
+poderCalorificoGas = 12 //[kWh/m3]
+precioM3Gas = 55 // [$/m3]
+precio_energia_Gas_Pesos_kWh = precioM3Gas / poderCalorificoGas
+precioDolar_Pesos = 1000 
+precio_energia_Gas_USD_kWh = precio_energia_Gas_Pesos_kWh / precioDolar_Pesos // SUMAR 60% de IMPUESTOS
+precio_energia_Gas_USD_Wh = precio_energia_Gas_USD_kWh / 1000 // SUMAR 60% de IMPUESTOS
 /////////////////////////////////////////////////////////////////////////////////////
 
 /* ------------------------------------------
@@ -146,7 +138,7 @@ function Qe = Q_edif(t, T_int)
     conductanciaTotalEdificacion = 1/(Re + Rc);
     Qe = conductanciaTotalEdificacion * (T_ext - T_int)
 endfunction
-
+// Integral de esto en las 24 horas del día, multiplicando dentro de la integral a Qc x 3600 para obtener el costo en Wh
 function Qc = Q_calef(t)
     /*  
         Función que devuelve la POTENCIA DE CALEFACCIÓN
@@ -188,13 +180,34 @@ function dT = f(t,T_int)
 endfunction
 
 
+// Funcion que calcula el calor de calefaccion el Wh
+function Cc= CalorCalefaccion()
+    // Calcular la integral desde 0 hasta 24
+    Cc = integrate('Q_calef(t)','t', 0, 24);
+    disp (Cc)
+endfunction
+
+// Funcion que calcula el calor de refrigeracion en Wh
+
+
+
+function Cr= CalorRefrigeracion()
+    // Calcular la integral desde 0 hasta 24
+    Cr = integrate('Q_refri(t)','t', 0, 24);
+endfunction
+
+precio_calefacion_diario = CalorCalefaccion() * precio_energia_Gas_USD_Wh
+precio_calefacion_diario_con_impuestos = precio_calefacion_diario + precio_calefacion_diario * 0.6
+precio_refrigeracion_diario = CalorRefrigeracion() * precioEnergiaRefrigeracion
+
+
 /*******************************************
    CALCULOS:
         (1) Ajustar los valores experimentales
             del coeficiente de transferencia por
             convección.
             Y obtener el coeficiente para la 
-            velocidad del aire del lugar. (2.5 Puntos)
+            velocidad del aire del lugar. (2.5 Puntos) ✅
         (2) Obtener la Temperatura Interior
             (Verificar que se cumplan las
              condiciones necesarias del proceso
@@ -239,3 +252,5 @@ for i = 1:N,
 end
 
 plot(t,T,'r')
+disp("Precio de calefacion mensual: "+ string (precio_calefacion_diario_con_impuestos*30) + " USD")
+disp("Precio de refrigeracion mensual: "+ string (precio_refrigeracion_diario*30) + " USD")
