@@ -4,15 +4,15 @@ clc
 //************************************
 // CONDICIÓN INICIAL DEL INTERIOR
 // -----------------------------------
-// SE PUEDE MODIFICAR DENTRO DEL 
+// SE PUEDE MODIFICAR DENTRO DEL
 // INTERVALO ADMITIDO POR EL PROCESO
-T_ini = 22;
+T_ini = 20;
 //************************************
 
 /************************************
  CONDICION FINAL
  ------------------------------------
- AL FINAL DEL DIA LA TEMPERATURA 
+ AL FINAL DEL DIA LA TEMPERATURA
  INTERNA DEBE SER IGUAL A LA INICIAL
 
 ************************************/
@@ -61,8 +61,25 @@ capacidadCalorificaEdificio = capacidadCalorificaUnitaria * superficiePiso // [J
         CALEFACCIÓN
 --------------------------------------------- */
 function Pc = potenciaCalefaccionUnitaria(t)
+    // PROPUESTA 1
+    // minPot = 1.3
+    // maxPot = 15
+    // if t <= InicioSubida || t >= FinBajada then
+    //     Pc = maxPot
+    // else
+    //     Pc = minPot
+    // end
+    // // PROPUESTA 2
+    // minPot = 0
+    // maxPot = 15
+    // if t <= InicioSubida || t >= InicioBajada then
+    //     Pc = maxPot
+    // else
+    //     Pc = minPot
+    // end
+    // PROPUESTA 3
     minPot = 1.3
-    maxPot = 15
+    maxPot = 16.5
     if t <= InicioSubida || t >= FinBajada then
         Pc = maxPot
     else
@@ -77,7 +94,7 @@ precioEnergiaCalefaccion = 1.6*0.0045/1000/0.8 // [dólares/Wh]
 poderCalorificoGas = 12 //[kWh/m3]
 precioM3Gas = 55 // [$/m3]
 precio_energia_Gas_Pesos_kWh = precioM3Gas / poderCalorificoGas
-precioDolar_Pesos = 1000 
+precioDolar_Pesos = 1000
 precio_energia_Gas_USD_kWh = precio_energia_Gas_Pesos_kWh / precioDolar_Pesos // SUMAR 60% de IMPUESTOS
 precio_energia_Gas_USD_Wh = precio_energia_Gas_USD_kWh / 1000 // SUMAR 60% de IMPUESTOS
 /////////////////////////////////////////////////////////////////////////////////////
@@ -90,10 +107,27 @@ function Pr = potenciaRefrigeracionUnitaria(t)
         PARA MODIFICAR:
         Esta función debe devolver la POTENCIA DE REFRIGERACIÓN por
         m2 de edificio, en función de la HORA.
-        IMPORTANTE: Expresamos la potencia con signo POSITIVO, ya que 
+        IMPORTANTE: Expresamos la potencia con signo POSITIVO, ya que
         se trata del calor que EXTRAE el refrigerador del interior.
     */
-    Pr = 1 // Potencia de refrigeración por metro cuadrado de superficie construida [W/m2]
+    // Pr = 1 // Potencia de refrigeración por metro cuadrado de superficie construida [W/m2]
+
+    // // PROPUESTA 2
+    // minPot = 0
+    // maxPot = 30
+    // if t >= FinSubida && t <= InicioBajada then
+    //     Pr = maxPot
+    // else
+    //     Pr = minPot
+    // end
+    // PROPUESTA 3
+    minPot= 0
+    maxPot = 5
+    if t<=FinSubida && t <= InicioBajada then
+        Pr = maxPot
+    else
+        Pr = minPot
+    end
 endfunction
 
 precioEnergiaRefrigeracion = 0.12/1000 // [dólares/Wh]
@@ -101,8 +135,8 @@ precioEnergiaRefrigeracion = 0.12/1000 // [dólares/Wh]
 
 function T_ext = T_exterior(t)
     /*
-        Función que toma el tiempo en HORAS y devuelve 
-        la TEMPERATURA EXTERIOR en C° 
+        Función que toma el tiempo en HORAS y devuelve
+        la TEMPERATURA EXTERIOR en C°
     */
     if t <= InicioSubida then
         T_ext = TAmbMin;
@@ -132,7 +166,7 @@ function Qe = Q_edif(t, T_int)
         el valor del FLUJO DE CALOR que atraviesa las paredes y techo
         tel edificio, el cual se mide en Watts [Joule/segundo].
     */
-    T_ext = T_exterior(t) 
+    T_ext = T_exterior(t)
     Re = 1/conductanciaEdificacion; // Resistencia a la transferencia de calor por la pared de la edificación
     Rc = 1/conductanciaConveccionEdificacion; // Resistencia a la transferencia de calor por convección en la edificación
     conductanciaTotalEdificacion = 1/(Re + Rc);
@@ -140,7 +174,7 @@ function Qe = Q_edif(t, T_int)
 endfunction
 // Integral de esto en las 24 horas del día, multiplicando dentro de la integral a Qc x 3600 para obtener el costo en Wh
 function Qc = Q_calef(t)
-    /*  
+    /*
         Función que devuelve la POTENCIA DE CALEFACCIÓN
         programada para cada HORA para el edificio en Watts [Joule/segundo]
     */
@@ -149,7 +183,7 @@ function Qc = Q_calef(t)
 endfunction
 
 function Qr = Q_refri(t)
-    /*  
+    /*
         Función que devuelve la POTENCIA DE REFRIGERACIÓN
         programada para cada HORA para el edificio en Watts [Joule/segundo]
     */
@@ -160,7 +194,7 @@ endfunction
 
 function Qt = Q_total(t, T_int)
     /*
-        Función que devuelve el CALOR TOTAL transferido 
+        Función que devuelve el CALOR TOTAL transferido
         hacia el interior del edificio.
         (Si el Calor va hacia adentro, el signo es positivo)
     */
@@ -206,7 +240,7 @@ precio_refrigeracion_diario = CalorRefrigeracion() * precioEnergiaRefrigeracion
         (1) Ajustar los valores experimentales
             del coeficiente de transferencia por
             convección.
-            Y obtener el coeficiente para la 
+            Y obtener el coeficiente para la
             velocidad del aire del lugar. (2.5 Puntos) ✅
         (2) Obtener la Temperatura Interior
             (Verificar que se cumplan las
@@ -252,5 +286,8 @@ for i = 1:N,
 end
 
 plot(t,T,'r')
+plot(t,18,":g")
+plot(t,20,":g")
+plot(t,22,":g")
 disp("Precio de calefacion mensual: "+ string (precio_calefacion_diario_con_impuestos*30) + " USD")
 disp("Precio de refrigeracion mensual: "+ string (precio_refrigeracion_diario*30) + " USD")
